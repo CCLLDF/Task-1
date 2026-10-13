@@ -1,4 +1,3 @@
-import numpy as np
 import csv
 
 infilename = "index.csv"
@@ -6,16 +5,23 @@ outfilename = "statistic.csv"
 
 
 def mean(massive):
+    if not(massive):
+        return 0
     return sum(massive)/len(massive)
 
+
 def disp(massive):
+    if not(massive):
+         return 0
     array = []
     m = mean(massive)
     for i in massive:
-        array=np.append(array,(i-m)**2)
+        array.append((i-m)**2)
     return mean(array)
 
 def mediana(array):
+     if not(array):
+          return 0
      array = sorted(array)
      if (len(array)%2==0):
           res = (array[len(array)//2] + array[len(array)//2 - 1])/2
@@ -31,25 +37,32 @@ def mediana(array):
 
 
 def main():
-     infl_rate = np.array([])
-     unemploy_rate = np.array([])
-     GPD = np.array([])
-     EFFR = np.array([])
+     infl_rate = []
+     unemploy_rate = []
+     GPD = []
+     EFFR = []
      names = ["GPD","EFFR","infl_rate","unemploy_rate"]
 
+     try:
+         with open(infilename,"r", newline = "") as file:
+            reader = csv.DictReader(file)
+            for row in reader:
+                if row["Effective Federal Funds Rate"]:
+                    EFFR.append(float(row["Effective Federal Funds Rate"])) 
+                if row["Real GDP (Percent Change)"]:
+                    GPD.append(float(row["Real GDP (Percent Change)"])) 
+                if row["Unemployment Rate"]:
+                    unemploy_rate.append(float(row["Unemployment Rate"]))   
+                if row["Inflation Rate"]:
+                    infl_rate.append(float(row["Inflation Rate"]))   
+     except Exception:
+         print("Файл не найден. Ошибка")
+         return
 
-     with open(infilename,"r", newline = "") as file:
-         reader = csv.DictReader(file)
-
-         for row in reader:
-             if row["Effective Federal Funds Rate"] and row["Real GDP (Percent Change)"] and row["Unemployment Rate"] and row["Inflation Rate"]:
-                 EFFR=np.append(EFFR,float(row["Effective Federal Funds Rate"])) 
-                 GPD=np.append(GPD,float(row["Real GDP (Percent Change)"])) 
-                 unemploy_rate=np.append(unemploy_rate,float(row["Unemployment Rate"]))      
-                 infl_rate=np.append(infl_rate,float(row["Inflation Rate"])) 
-
-         matrix = [GPD,EFFR,infl_rate,unemploy_rate]
-
+     matrix = [GPD,EFFR,infl_rate,unemploy_rate]
+     if not any(len(row) > 0 for row in matrix):
+         print("Датасет пустой. Ошибка!")
+         return
      with open(outfilename, "w", newline="") as file:
           columns = ["name","disp","mean","med"]
           writer = csv.DictWriter(file,fieldnames = columns)
